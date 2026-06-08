@@ -49,19 +49,19 @@ class Lane():
 
 left_lane = Lane()
 right_lane = Lane()
-frame_width = 1280
-frame_height = 720
+frame_width = 1640
+frame_height = 590
 
 LANEWIDTH = 3.7  # highway lane width in US: 3.7 meters
 input_scale = 4
 output_frame_scale = 4
 N = 4 # buffer previous N lines
 
-# fullsize:1280x720
-x = [194, 1117, 705, 575]
-y = [719, 719, 461, 461]
-X = [290, 990, 990, 290]
-Y = [719, 719, 0, 0]
+# fullsize:1640x590
+x = [372, 762, 971, 614]
+y = [315, 315, 440, 440]
+X = [371, 1269, 1269, 371]
+Y = [589, 589, 0, 0]
 
 src = np.floor(np.float32([[x[0], y[0]], [x[1], y[1]],[x[2], y[2]], [x[3], y[3]]]) / input_scale)
 dst = np.floor(np.float32([[X[0], Y[0]], [X[1], Y[1]],[X[2], Y[2]], [X[3], Y[3]]]) / input_scale)
@@ -70,8 +70,15 @@ M = cv2.getPerspectiveTransform(src, dst)
 M_inv = cv2.getPerspectiveTransform(dst, src)
 
 # Only for creating the final video visualization
+x_scale_factor = frame_width/1280
+y_scale_factor = frame_height/720
 X_b = [574, 706, 706, 574]
 Y_b = [719, 719, 0, 0]
+
+# Scale and convert to int
+X_scaled = [int(x * x_scale_factor) for x in X_b]
+Y_scaled = [int(y * y_scale_factor) for y in Y_b]
+
 src_ = np.floor(np.float32([[x[0], y[0]], [x[1], y[1]],[x[2], y[2]], [x[3], y[3]]]) / (input_scale*2))
 dst_ = np.floor(np.float32([[X_b[0], Y_b[0]], [X_b[1], Y_b[1]],[X_b[2], Y_b[2]], [X_b[3], Y_b[3]]]) / (input_scale*2))
 M_b = cv2.getPerspectiveTransform(src_, dst_)
@@ -577,7 +584,8 @@ def process_frame(img, visualization=False):
 
     start = timer()
     # resize the input image according to scale
-    img_undist_ = cv2.undistort(img, mtx, dist, None, mtx)
+    img_undist_ = img
+    #img_undist_ = cv2.undistort(img, mtx, dist, None, mtx)
     img_undist = cv2.resize(img_undist_, (0,0), fx=1/input_scale, fy=1/input_scale)
 
     # find the binary image of lane/edges
